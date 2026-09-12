@@ -38,4 +38,24 @@ describe('RegisterDto', () => {
     expect(dto.firstName).toBe('Ana');
     expect(dto.lastName).toBe('García');
   });
+
+  it('accepts numeric-like fields and lower-case document types by normalizing them', () => {
+    const dto = plainToInstance(RegisterDto, {
+      firstName: 'Luis',
+      lastName: 'Pérez',
+      email: 'luis@example.com',
+      phone: 3001234567,
+      documentType: 'cc',
+      documentNumber: 987654321,
+      nationality: 'Colombia',
+      password: 'Secret123',
+    });
+
+    const errors = validateSync(dto);
+
+    expect(errors).toHaveLength(0);
+    expect(dto.phone).toBe('3001234567');
+    expect(dto.documentType).toBe('CC');
+    expect(dto.documentNumber).toBe('987654321');
+  });
 });
