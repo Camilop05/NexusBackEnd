@@ -1,15 +1,22 @@
-import { IsEmail, IsIn, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsIn, IsOptional, IsString, MinLength } from 'class-validator';
 import { DOCUMENT_TYPES } from '../../users/dto/create-user.dto';
 import type { DocumentTypeDto } from '../../users/dto/create-user.dto';
 
 export class RegisterDto {
+  @IsOptional()
   @IsString()
   @MinLength(2)
-  firstName!: string;
+  firstName?: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(2)
-  lastName!: string;
+  lastName?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  name?: string;
 
   @IsEmail()
   email!: string;

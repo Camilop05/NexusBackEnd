@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import type { JwtSignOptions } from '@nestjs/jwt';
@@ -8,6 +8,21 @@ import { UsersService } from '../users/users.service';
 import { AuthRepository } from './auth.repository';
 import { RegisterDto } from './dto/register.dto';
 import type { AuthenticatedUser } from './types/authenticated-user.type';
+
+function splitName(fullName: string) {
+  const trimmedName = fullName.trim();
+  const parts = trimmedName.split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) {
+    return { firstName: '', lastName: '' };
+  }
+
+  const [firstName, ...rest] = parts;
+  return {
+    firstName,
+    lastName: rest.join(' ') || firstName,
+  };
+}
 
 @Injectable()
 export class AuthService {
@@ -20,10 +35,16 @@ export class AuthService {
 
   // Registro: crea usuario y devuelve tokens de una vez.
   async register(dto: RegisterDto) {
+    const resolvedName = dto.name ? splitName(dto.name) : { firstName: dto.firstName, lastName: dto.lastName };
+
+    if (!resolvedName.firstName || !resolvedName.lastName) {
+      throw new BadRequestException('Debe enviar firstName y lastName o un campo name válido');
+    }
+
     const user = await this.usersService.create({
       email: dto.email,
-      firstName: dto.firstName,
-      lastName: dto.lastName,
+      firstName: resolvedName.firstName,
+      lastName: resolvedName.lastName,
       phone: dto.phone,
       documentType: dto.documentType,
       documentNumber: dto.documentNumber,
