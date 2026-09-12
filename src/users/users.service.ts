@@ -38,11 +38,22 @@ export class UsersService {
       throw new ConflictException('El correo ya está registrado');
     }
 
+    const existingDocument = await this.usersRepository.findByDocumentNumber(dto.documentNumber);
+
+    if (existingDocument) {
+      throw new ConflictException('El número de documento ya está registrado');
+    }
+
     const passwordHash = await this.hashPassword(dto.password);
 
     return this.usersRepository.create({
       email: dto.email,
-      name: dto.name,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      phone: dto.phone,
+      documentType: dto.documentType,
+      documentNumber: dto.documentNumber,
+      nationality: dto.nationality,
       passwordHash,
       role: dto.role,
     });
@@ -55,7 +66,12 @@ export class UsersService {
 
     return this.usersRepository.update(id, {
       email: dto.email,
-      name: dto.name,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      phone: dto.phone,
+      documentType: dto.documentType,
+      documentNumber: dto.documentNumber,
+      nationality: dto.nationality,
       passwordHash,
       role: dto.role,
       isActive: dto.isActive,

@@ -14,24 +14,77 @@ enum Role {
   SUPERVISOR
 }
 
+// Tipos de documento de identidad soportados en el registro.
+enum DocumentType {
+  CC
+  CE
+  TI
+  PASAPORTE
+}
+
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  name          String
+  id             String         @id @default(uuid())
+  email          String         @unique
 
-  passwordHash  String
+  firstName      String
+  lastName       String
 
-  role          Role           @default(USER)
+  phone          String
 
-  isActive      Boolean        @default(true)
+  documentType   DocumentType
+  documentNumber String         @unique
 
-  refreshTokens RefreshToken[]
+  // Nacionalidad del usuario. En la UI se presenta temáticamente como
+  // "sector de origen" dentro de la red Nexus, pero el dato es un país real.
+  nationality    String
 
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  passwordHash   String
+
+  role           Role           @default(USER)
+
+  isActive       Boolean        @default(true)
+
+  refreshTokens  RefreshToken[]
+  accessLogs     AccessLog[]
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   @@index([role])
   @@index([isActive])
+}
+
+// Zona física/lógica de la estación (Puente de mando, Laboratorio, Muelle de acoplamiento...).
+// minRole define el nivel mínimo de autorización requerido para entrar.
+model AccessZone {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  minRole     Role         @default(USER)
+  isActive    Boolean      @default(true)
+
+  accessLogs  AccessLog[]
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+// Bitácora: cada intento de entrada a una zona, otorgado o denegado.
+model AccessLog {
+  id           String     @id @default(uuid())
+
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  zoneId       String
+  zone         AccessZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  granted      Boolean
+  attemptedAt  DateTime   @default(now())
+
+  @@index([userId])
+  @@index([zoneId])
+  @@index([attemptedAt])
 }
 
 model RefreshToken {

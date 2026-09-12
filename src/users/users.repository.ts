@@ -6,12 +6,19 @@ import { PrismaService } from '../prisma/prisma.service';
 const publicUserSelect = {
   id: true,
   email: true,
-  name: true,
+  firstName: true,
+  lastName: true,
+  phone: true,
+  documentType: true,
+  documentNumber: true,
+  nationality: true,
   role: true,
   isActive: true,
   createdAt: true,
   updatedAt: true,
 };
+
+type DocumentType = 'CC' | 'CE' | 'TI' | 'PASAPORTE';
 
 @Injectable()
 export class UsersRepository {
@@ -39,9 +46,20 @@ export class UsersRepository {
     });
   }
 
+  findByDocumentNumber(documentNumber: string) {
+    return this.prisma.user.findUnique({
+      where: { documentNumber },
+    });
+  }
+
   create(data: {
     email: string;
-    name: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    documentType: DocumentType;
+    documentNumber: string;
+    nationality: string;
     passwordHash: string;
     role?: 'ADMIN' | 'USER' | 'SUPERVISOR';
   }) {
@@ -55,7 +73,12 @@ export class UsersRepository {
     id: string,
     data: Partial<{
       email: string;
-      name: string;
+      firstName: string;
+      lastName: string;
+      phone: string;
+      documentType: DocumentType;
+      documentNumber: string;
+      nationality: string;
       passwordHash: string;
       role: 'ADMIN' | 'USER' | 'SUPERVISOR';
       isActive: boolean;

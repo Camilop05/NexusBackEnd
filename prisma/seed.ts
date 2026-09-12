@@ -17,12 +17,31 @@ async function main() {
     update: { passwordHash, isActive: true },
     create: {
       email: 'admin@example.com',
-      name: 'Administrador',
+      firstName: 'Admin',
+      lastName: 'Nexus',
+      phone: '3000000000',
+      documentType: 'CC',
+      documentNumber: '0000000000',
+      nationality: 'Colombiana',
       passwordHash,
       role: 'ADMIN',
       isActive: true,
     },
   });
+
+  const zones: Array<{ name: string; description: string; minRole: 'ADMIN' | 'USER' | 'SUPERVISOR' }> = [
+    { name: 'Cubierta común', description: 'Área de acceso general para toda la tripulación', minRole: 'USER' },
+    { name: 'Laboratorio', description: 'Zona de investigación y experimentos', minRole: 'SUPERVISOR' },
+    { name: 'Puente de mando', description: 'Control central de la estación', minRole: 'ADMIN' },
+  ];
+
+  for (const zone of zones) {
+    await prisma.accessZone.upsert({
+      where: { name: zone.name },
+      update: {},
+      create: zone,
+    });
+  }
 }
 
 main()

@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { Public } from '../common/decorators/public.decorator';
+import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { LoginDto } from './dto/login.dto';
@@ -10,7 +11,10 @@ import type { AuthenticatedUser } from './types/authenticated-user.type';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
   // Público: permite crear cuenta sin estar autenticado.
   @Public()
@@ -44,9 +48,10 @@ export class AuthController {
     return this.authService.logout(user);
   }
 
-  // Protegido. Devuelve el usuario que viene dentro del access token.
+  // Protegido. El token solo trae id/email/role, así que consultamos el
+  // perfil completo en la base de datos (nombres, documento, celular, etc.).
   @Get('me')
   me(@CurrentUser() user: AuthenticatedUser) {
-    return user;
+    return this.usersService.findOne(user.id);
   }
 }

@@ -22,7 +22,12 @@ export class AuthService {
   async register(dto: RegisterDto) {
     const user = await this.usersService.create({
       email: dto.email,
-      name: dto.name,
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      phone: dto.phone,
+      documentType: dto.documentType,
+      documentNumber: dto.documentNumber,
+      nationality: dto.nationality,
       password: dto.password,
     });
 
